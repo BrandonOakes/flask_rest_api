@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, abort
 
 
-from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with
+from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with, url_for
 
 import models
 
@@ -42,8 +42,8 @@ class TodoList(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        models.Todo.create(**args)
-        return jsonify({'todo_list': "todo_list"})
+        course = models.Todo.create(**args)
+        return course
 
 
 
@@ -59,23 +59,25 @@ class TodoTask(Resource):
         """
         return task_or_404(id)
 
+    @marshal_with(todo_fields)
     def put(self, id):
         """returns specific Todo task when request method is GET
            and task id is supplied
         """
-        return jsonify({
-                "id": 1,
-                "practice": "specific task"
-        })
+
+        args = self.reqparse.parse_args()
+        query = models.Todo.update(**args).where(models.Todo.id==id)
+        query.execute()
+        return (models.Todo.get(models.Todo.id==id), 200,
+               {'Location': url_for('resources.todo.todotask', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
 
     def delete(self, id):
         """returns specific Todo task when request method is GET
            and task id is supplied
         """
-        return jsonify({
-                "id": 1,
-                "practice": "specific task"
-        })
+        query = models.Todo.delete().where(models.Todo.id==id)
+        query.execute()
+        return '', 204, {'Location': url_for('resources.todo.todo', id=id)}  #confused about where i am sending them to in resources.todo.todo
 
 
 
