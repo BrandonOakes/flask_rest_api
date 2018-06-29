@@ -31,16 +31,6 @@ of tutorials online, so we won't cover it here.
     	pip install - requirements.txt
 
 
-4. Next, migrate the database
+4. Run application
 
-
-    	python manage.py makemigrations
-
-
-    	python manage.py migrate
-
-
-5. Run server
-
-
-    	python manage.py runserver
+      python app.py
