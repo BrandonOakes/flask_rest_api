@@ -1,14 +1,14 @@
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, jsonify, abort, g, make_response
+import json
 
 
 from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with, url_for
 
 import models
+from auth import auth
 
 todo_fields = {
-    'id': fields.Integer,
-    'task_title': fields.String
-}
+    'task_title': fields.String}
 
 def task_or_404(task_id):
     try:
@@ -40,10 +40,12 @@ class TodoList(Resource):
                 for task in models.Todo.select()]
         return {'todos': todos}
 
+    @marshal_with(todo_fields)
+    @auth.login_required
     def post(self):
         args = self.reqparse.parse_args()
-        course = models.Todo.create(**args)
-        return course
+        todo = models.Todo.create(made_by=g.user,**args)
+        return 201    #look into basic auth video around 5 minutes for returning locator
 
 
 
@@ -60,24 +62,33 @@ class TodoTask(Resource):
         return task_or_404(id)
 
     @marshal_with(todo_fields)
+    @auth.login_required
     def put(self, id):
-        """returns specific Todo task when request method is GET
-           and task id is supplied
-        """
-
         args = self.reqparse.parse_args()
-        query = models.Todo.update(**args).where(models.Todo.id==id)
+        try:
+            todo = models.Todo.select().where(models.Todo.made_by==g.user,
+                   models.Todo.id==id).get()  #might not work cause ID issue
+        except models.Todo.DoesNotExist:
+            return make_response(json.dumps({'error':'Task can not be edited'}), 403)
+        todo = task_or_404(id)           #might not work cause ID issue
+        query = todo.update(**args)
         query.execute()
         return (models.Todo.get(models.Todo.id==id), 200,
-               {'Location': url_for('resources.todo.todotask', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
+               {'Location': url_for('resource.todo.todos', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
 
+    @auth.login_required
     def delete(self, id):
         """returns specific Todo task when request method is GET
            and task id is supplied
         """
+        try:
+            todo = models.Todo.select().where(models.Todo.made_by==g.user,
+                   models.Todo.id==id).get()  #might not work cause ID issue
+        except models.Todo.DoesNotExist:
+            return make_response(json.dumps({'error':'Task can not be edited'}), 403)
         query = models.Todo.delete().where(models.Todo.id==id)
         query.execute()
-        return '', 204, {'Location': url_for('resources.todo.todo', id=id)}  #confused about where i am sending them to in resources.todo.todo
+        return '', 204, {'Location': url_for('resource.todo.todos', id=id)}  #confused about where i am sending them to in resources.todo.todo
 
 
 

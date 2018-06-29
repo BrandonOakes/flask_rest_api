@@ -3,9 +3,11 @@ from flask import Flask, g, jsonify, render_template
 import config
 import models
 from resources.todo import todo_api
+from resources.user import user_api
 
 app = Flask(__name__)
 app.register_blueprint(todo_api)
+app.register_blueprint(user_api)
 
 
 @app.route('/')
