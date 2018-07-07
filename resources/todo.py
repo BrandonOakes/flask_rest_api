@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify, abort, g, make_response
 import json
 
-
 from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with, url_for
 
 import models
 from auth import auth
 
 todo_fields = {
-    'task_title': fields.String}
+    'name': fields.String,
+    'id': fields.Integer}
 
 def task_or_404(task_id):
     try:
@@ -26,9 +26,9 @@ class TodoList(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'task_title',
+            'name',
             required=True,
-            help="Title for task required",
+            help="Name for task required",
             location=['form', 'json']
         )
         super().__init__()
@@ -38,14 +38,15 @@ class TodoList(Resource):
 
         todos = [marshal(task, todo_fields)
                 for task in models.Todo.select()]
-        return {'todos': todos}
+        return {'todos': todos} ######## todos
+
 
     @marshal_with(todo_fields)
     @auth.login_required
     def post(self):
         args = self.reqparse.parse_args()
         todo = models.Todo.create(made_by=g.user,**args)
-        return 201    #look into basic auth video around 5 minutes for returning locator
+        return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})   ######## resources.todos.todo
 
 
 
@@ -53,6 +54,14 @@ class TodoList(Resource):
 
 class TodoTask(Resource):
     """Api that returns specific todo task"""
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            'name',
+            required=True,
+            help="Name for task required",
+            location=['form', 'json'])
 
     @marshal_with(todo_fields)
     def get(self, id):
@@ -74,7 +83,7 @@ class TodoTask(Resource):
         query = todo.update(**args)
         query.execute()
         return (models.Todo.get(models.Todo.id==id), 200,
-               {'Location': url_for('resource.todo.todos', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
+               {'Location': url_for('resources.todos.todo', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
 
     @auth.login_required
     def delete(self, id):
@@ -88,7 +97,7 @@ class TodoTask(Resource):
             return make_response(json.dumps({'error':'Task can not be edited'}), 403)
         query = models.Todo.delete().where(models.Todo.id==id)
         query.execute()
-        return '', 204, {'Location': url_for('resource.todo.todos', id=id)}  #confused about where i am sending them to in resources.todo.todo
+        return ('', 204, {'Location': url_for('resource.todos.todo', id=id)})  #confused about where i am sending them to in resources.todo.todo
 
 
 

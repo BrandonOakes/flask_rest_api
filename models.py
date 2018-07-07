@@ -4,7 +4,6 @@ from argon2 import PasswordHasher
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
                           BadSignature, SignatureExpired)
 from peewee import *
-from argon2 import PasswordHasher
 
 import config
 
@@ -54,7 +53,8 @@ class Todo(Model):
     """Creates and stores todo task entered by a specific username
     """
     # user_id = ForeignKeyField(User)
-    task_title = CharField()
+    name = CharField()  #attribute 'name' is in static script
+    created_at = DateTimeField(default=datetime.datetime.now)
     made_by = ForeignKeyField(User, related_name="topic_set")
     # completed = BooleanField(default=False)
 

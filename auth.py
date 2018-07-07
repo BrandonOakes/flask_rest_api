@@ -8,7 +8,7 @@ basic_auth = HTTPBasicAuth()
 auth = basic_auth
 
 @basic_auth.verify_password
-def verify_password(username_or_email):
+def verify_password(password, username_or_email):
     try:
         user = models.User.get((models.User.username == username_or_email) |
                            (models.User.email == username_or_email) )

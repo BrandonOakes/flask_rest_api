@@ -45,7 +45,7 @@ class UserList(Resource):
     def post(self):
         args = self.reqparse.parse_args()
         if args.get('password') == args.get('verify_password'):
-            user = models.User.create(**args)
+            user = models.User.create_user(**args)
             return marshal(user, user_fields), 201
         return make_response(json.dumps({'error': 'Passwords must match'}), 400)
 
