@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, abort, g, make_response
 import json
 
-from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with, url_for
+from flask import abort, Blueprint, g, jsonify, make_response
+from flask_restful import Api, fields, inputs, marshal, marshal_with, Resource, reqparse, url_for
 
 import models
 from auth import auth
@@ -11,6 +11,8 @@ todo_fields = {
     'id': fields.Integer}
 
 def task_or_404(task_id):
+    """returns task or 404"""
+
     try:
         task = models.Todo.get(models.Todo.id==task_id)
     except models.Todo.DoesNotExist:
@@ -44,6 +46,8 @@ class TodoList(Resource):
     @marshal_with(todo_fields)
     @auth.login_required
     def post(self):
+        """post new task to task list"""
+
         args = self.reqparse.parse_args()
         todo = models.Todo.create(made_by=g.user,**args)
         return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})   ######## resources.todos.todo
@@ -73,6 +77,8 @@ class TodoTask(Resource):
     @marshal_with(todo_fields)
     @auth.login_required
     def put(self, id):
+        """updates existing todo task"""
+        
         args = self.reqparse.parse_args()
         try:
             todo = models.Todo.select().where(models.Todo.made_by==g.user,
@@ -97,7 +103,7 @@ class TodoTask(Resource):
             return make_response(json.dumps({'error':'Task can not be edited'}), 403)
         query = models.Todo.delete().where(models.Todo.id==id)
         query.execute()
-        return ('', 204, {'Location': url_for('resource.todos.todo', id=id)})  #confused about where i am sending them to in resources.todo.todo
+        return ('', 204, {'Location': url_for('resources.todos.todo', id=id)})  #confused about where i am sending them to in resources.todo.todo
 
 
 
@@ -106,4 +112,4 @@ todo_api = Blueprint('resource.todo', __name__)
 api = Api(todo_api)
 #add todo_api resource with api/v1/todos
 api.add_resource(TodoList, '/api/v1/todos', endpoint='todos')
-api.add_resource(TodoTask, '/api/v1/todos/<int:id>', endpoint="task")
+api.add_resource(TodoTask, '/api/v1/todos/<int:id>', endpoint="todo")

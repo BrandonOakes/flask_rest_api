@@ -21,22 +21,34 @@ class TestTodo(unittest.TestCase):
         os.unlink(app.config['DATABASE'])
 
     def test_index(self):
+        """test that index template returns 200 status code"""
+
         request = self.app.get('/')
         self.assertEqual(request.status_code, 200)
 
     def test_todo_list_api(self):
+        """test that get api resource for todo list returns 200 status code"""
+
         request = self.app.get('/api/v1/todos')
         self.assertEqual(request.status_code, 200)
 
     def test_post_todo_list(self):
+        """test that post api resource for todo list returns 200 status code"""
+
         request = self.app.post('/api/v1/todos')
         self.assertEqual(request.status_code, 200)
 
     def test_todo_item(self):
+        """test that api resource for specific task returns 404 status code if no task has
+           been created
+        """
+
         request = self.app.get('/api/v1/todos/1')
         self.assertEqual(request.status_code, 404) #getting 404 on item
 
     def test_user(self):
+        """test that api resource for user returns 405 status code"""
+
         request = self.app.get('/api/v1/users')
         self.assertEqual(request.status_code, 405)#getting 405
 

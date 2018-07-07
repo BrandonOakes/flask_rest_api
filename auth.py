@@ -9,6 +9,7 @@ auth = basic_auth
 
 @basic_auth.verify_password
 def verify_password(password, username_or_email):
+    """verifies that user has not already been created and verifies password"""
     try:
         user = models.User.get((models.User.username == username_or_email) |
                            (models.User.email == username_or_email) )

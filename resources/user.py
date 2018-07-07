@@ -1,9 +1,8 @@
 #create api that can search task by user?
-from flask import Blueprint, jsonify, abort, make_response
 import json
 
-
-from flask_restful import Api, Resource, reqparse, inputs, fields, marshal, marshal_with, url_for
+from flask import abort, Blueprint, jsonify, make_response
+from flask_restful import Api, fields, inputs, marshal, marshal_with, Resource, reqparse, url_for
 
 import models
 
@@ -15,6 +14,8 @@ class UserList(Resource):
     """API that returns list of users"""
 
     def __init__(self):
+        """initiates UserList"""
+
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
             'username',
@@ -43,6 +44,8 @@ class UserList(Resource):
         super().__init__()
 
     def post(self):
+        """post request for User"""
+        
         args = self.reqparse.parse_args()
         if args.get('password') == args.get('verify_password'):
             user = models.User.create_user(**args)

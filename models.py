@@ -28,6 +28,8 @@ class User(Model):
 
     @classmethod
     def create_user(cls, username, email, password, **kwargs):
+        """ class method that creates new user"""
+
         email = email.lower()
         try:
             cls.select().where((cls.email==email)|(cls.username**username)).get()
@@ -41,9 +43,13 @@ class User(Model):
 
     @staticmethod
     def make_password(password):
+        """password hash"""
+
         return HASHER.hash(password)
 
     def verify_password(self, password):
+        """verify users password"""
+        
         return HASHER.verify(self.password, password)
 
 
