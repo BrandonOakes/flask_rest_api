@@ -1,9 +1,8 @@
 import unittest
 import os
 import tempfile
-from app import app
-from base64 import b64encode
 
+from app import app
 
 
 class TestTodo(unittest.TestCase):
@@ -39,20 +38,18 @@ class TestTodo(unittest.TestCase):
         self.assertEqual(request.status_code, 200)
 
     def test_todo_item(self):
-        """test that api resource for specific task returns 404 status code if no task has
-           been created
+        """test that api resource for specific task returns 404 status code
+           if no task has been created
         """
 
         request = self.app.get('/api/v1/todos/1')
-        self.assertEqual(request.status_code, 404) #getting 404 on item
+        self.assertEqual(request.status_code, 404)  # getting 404 on item
 
     def test_user(self):
         """test that api resource for user returns 405 status code"""
 
         request = self.app.get('/api/v1/users')
-        self.assertEqual(request.status_code, 405)#getting 405
-
-
+        self.assertEqual(request.status_code, 405)  # getting 405
 
 
 if __name__ == '__main__':

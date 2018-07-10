@@ -10,18 +10,18 @@ todo_fields = {
     'name': fields.String,
     'id': fields.Integer}
 
+
 def task_or_404(task_id):
     """returns task or 404"""
 
     try:
-        task = models.Todo.get(models.Todo.id==task_id)
+        task = models.Todo.get(models.Todo.id == task_id)
     except models.Todo.DoesNotExist:
         abort(404)
     else:
         return task
 
-#create api/v1/todos to get todolist
-
+# create api/v1/todos to get todolist
 class TodoList(Resource):
     """API that returns list of Todo task"""
 
@@ -40,8 +40,7 @@ class TodoList(Resource):
 
         todos = [marshal(task, todo_fields)
                 for task in models.Todo.select()]
-        return {'todos': todos} ######## todos
-
+        return {'todos': todos}
 
     @marshal_with(todo_fields)
     @auth.login_required
@@ -49,13 +48,11 @@ class TodoList(Resource):
         """post new task to task list"""
 
         args = self.reqparse.parse_args()
-        todo = models.Todo.create(made_by=g.user,**args)
-        return (todo, 201, {'Location': url_for('resources.todos.todo', id=todo.id)})   ######## resources.todos.todo
+        todo = models.Todo.create(made_by=g.user, **args)
+        return (todo, 201)
 
 
-
-#create api/v1/todos/<int:id> to get specific todo task
-
+# create api/v1/todos/<int:id> to get specific todo task
 class TodoTask(Resource):
     """Api that returns specific todo task"""
 
@@ -78,18 +75,12 @@ class TodoTask(Resource):
     @auth.login_required
     def put(self, id):
         """updates existing todo task"""
-        
+
         args = self.reqparse.parse_args()
-        try:
-            todo = models.Todo.select().where(models.Todo.made_by==g.user,
-                   models.Todo.id==id).get()  #might not work cause ID issue
-        except models.Todo.DoesNotExist:
-            return make_response(json.dumps({'error':'Task can not be edited'}), 403)
-        todo = task_or_404(id)           #might not work cause ID issue
+        todo = task_or_404(id)
         query = todo.update(**args)
         query.execute()
-        return (models.Todo.get(models.Todo.id==id), 200,
-               {'Location': url_for('resources.todos.todo', id=id)})  #confused by this .todotask? returning a header(body,status code, location)
+        return (models.Todo.get(models.Todo.id == id), 200)  # 200 status code to imply resource updated successfully
 
     @auth.login_required
     def delete(self, id):
@@ -97,19 +88,18 @@ class TodoTask(Resource):
            and task id is supplied
         """
         try:
-            todo = models.Todo.select().where(models.Todo.made_by==g.user,
-                   models.Todo.id==id).get()  #might not work cause ID issue
+            todo = models.Todo.select().where(models.Todo.made_by == g.user,
+                   models.Todo.id == id).get()
         except models.Todo.DoesNotExist:
-            return make_response(json.dumps({'error':'Task can not be edited'}), 403)
-        query = models.Todo.delete().where(models.Todo.id==id)
+            return make_response(json.dumps({'error': 'Task can not be edited'}), 403)
+        query = models.Todo.delete().where(models.Todo.id == id)
         query.execute()
-        return ('', 204, {'Location': url_for('resources.todos.todo', id=id)})  #confused about where i am sending them to in resources.todo.todo
+        return ('', 204)  # 204 status code to let user know deletion request was processed but no content shall be returned
 
 
-
-#make todo_api
+# make todo_api
 todo_api = Blueprint('resource.todo', __name__)
 api = Api(todo_api)
-#add todo_api resource with api/v1/todos
+# add todo_api resource with api/v1/todos
 api.add_resource(TodoList, '/api/v1/todos', endpoint='todos')
 api.add_resource(TodoTask, '/api/v1/todos/<int:id>', endpoint="todo")

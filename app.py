@@ -10,7 +10,7 @@ app.register_blueprint(todo_api)
 app.register_blueprint(user_api)
 
 
-@app.route('/', methods =['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def my_todos():
     return render_template('index.html')
 

@@ -1,4 +1,4 @@
-#create api that can search task by user?
+# create api that can search task by user?
 import json
 
 from flask import abort, Blueprint, jsonify, make_response
@@ -7,8 +7,9 @@ from flask_restful import Api, fields, inputs, marshal, marshal_with, Resource, 
 import models
 
 user_fields = {
-        'username' : fields.String,
+        'username': fields.String,
 }
+
 
 class UserList(Resource):
     """API that returns list of users"""
@@ -45,7 +46,7 @@ class UserList(Resource):
 
     def post(self):
         """post request for User"""
-        
+
         args = self.reqparse.parse_args()
         if args.get('password') == args.get('verify_password'):
             user = models.User.create_user(**args)
