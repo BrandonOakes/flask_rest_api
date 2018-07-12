@@ -77,8 +77,7 @@ class TodoTask(Resource):
         """updates existing todo task"""
 
         args = self.reqparse.parse_args()
-        todo = task_or_404(id)
-        query = todo.update(**args)
+        query = models.Todo.update(**args).where(models.Todo.id == id)   # no longer calling task_or_404, will query locally from put method
         query.execute()
         return (models.Todo.get(models.Todo.id == id), 200)  # 200 status code to imply resource updated successfully
 
