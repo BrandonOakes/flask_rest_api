@@ -71,8 +71,8 @@ class TodoTask(Resource):
         """
         return task_or_404(id)
 
-    @marshal_with(todo_fields)
     @auth.login_required
+    @marshal_with(todo_fields)
     def put(self, id):
         """updates existing todo task"""
 
